@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Algorithm for housing development</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+  <script
+  src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"
+  type="text/javascript"></script>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Algorithm for housing development</h1>
+</header>
+<h1 id="core-economic-logic">Core Economic Logic</h1>
+<p>The algorithm models how housing development might respond to price
+signals while respecting environmental and planning constraints. It
+assumes that development will occur where:</p>
+<ol type="1">
+<li>Prices are sufficiently high to justify construction costs</li>
+<li>Land is available and not environmentally protected</li>
+<li>Current density is low enough to allow additional development</li>
+</ol>
+<h1 id="protected-land-calculation">Protected Land Calculation</h1>
+<p>The first step establishes where building cannot happen. The
+algorithm creates buffer zones around protected areas:</p>
+<p><span class="math display">\[
+A_{i,\text{protected}} = \bigcup_{j \in J} \text{buffer}(A_{i,j}, b_j)
+\]</span></p>
+<p>This reflects real-world planning constraints where development is
+restricted not just within protected areas but also in their immediate
+vicinity. Buffer sizes vary by protection type:</p>
+<ul>
+<li>5km for National Parks (substantial buffer reflecting their national
+importance)</li>
+<li>2.5km for Areas of Outstanding Natural Beauty</li>
+<li>200m for Sites of Special Scientific Interest and Ancient Woodland
+(more localized protection)</li>
+</ul>
+<h1 id="development-process">Development Process</h1>
+<h2 id="price-signals">Price Signals</h2>
+<p>In each iteration, development occurs where prices exceed
+construction costs by a sufficient margin:</p>
+<p><span class="math display">\[
+P_{i,t} &gt; c(1+\delta)
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(P_{i,t}\)</span> is the local price per
+square meter</li>
+<li><span class="math inline">\(c\)</span> is the construction cost
+(£3,000)</li>
+<li><span class="math inline">\(\delta\)</span> is the required return
+(10%)</li>
+</ul>
+<p>This reflects the real-world requirement that developers need a
+profit margin to justify construction.</p>
+<h2 id="rate-of-development">Rate of Development</h2>
+<p>The amount of new housing in buildable areas is proportional to:</p>
+<p><span class="math display">\[
+\Delta H_{i,t} = H_{i,t} \cdot s \cdot \frac{P_{i,t} -
+c(1+\delta)}{\max_j(P_{j,t} - c(1+\delta))}
+\]</span></p>
+<p>This formula captures several key economic insights:</p>
+<ol type="1">
+<li>Development is faster where price differentials are larger</li>
+<li>Areas with more existing housing can accommodate more new
+housing</li>
+<li>The step size (s = 0.01) prevents unrealistic sudden changes</li>
+</ol>
+<h2 id="price-response">Price Response</h2>
+<p>As new homes are built, prices adjust:</p>
+<p><span class="math display">\[
+P_{i,t+1} = P_{i,t} \cdot \left(1 - \epsilon \cdot \frac{\sum_i \Delta
+H_{i,t}}{\sum_i H_{i,t}}\right)
+\]</span></p>
+<p>The price elasticity (<span class="math inline">\(\epsilon =
+1.8\)</span>) determines how much prices fall as supply increases. This
+captures the market’s response to increased housing supply.</p>
+<h1 id="key-features-and-economic-implications">Key Features and
+Economic Implications</h1>
+<h2 id="market-led-development">Market-Led Development</h2>
+<p>The algorithm allows development to occur where demand (as signaled
+by prices) is highest, subject to constraints. This mimics how real
+estate markets function, with developers responding to price
+signals.</p>
+<h2 id="progressive-price-moderation">Progressive Price Moderation</h2>
+<p>As more homes are built in high-price areas, prices gradually
+moderate. This reflects how increasing supply can improve affordability
+over time.</p>
+<h2 id="environmental-protection">Environmental Protection</h2>
+<p>The algorithm maintains absolute protection for key environmental
+assets while allowing some development in less sensitive areas (e.g.,
+partial Green Belt development).</p>
+<h2 id="density-aware-growth">Density-Aware Growth</h2>
+<p>By limiting development in already dense areas, the algorithm
+promotes expansion where it’s most physically feasible.</p>
+<h2 id="self-limiting-mechanism">Self-Limiting Mechanism</h2>
+<p>Development naturally slows and stops when:</p>
+<ul>
+<li>Prices fall below the development threshold</li>
+<li>Density limits are reached</li>
+<li>Protected land constraints bind</li>
+</ul>
+<h1 id="limitations-and-assumptions">Limitations and Assumptions</h1>
+<p>The algorithm makes several simplifying assumptions:</p>
+<ol type="1">
+<li>Uniform construction costs across locations</li>
+<li>No local infrastructure constraints</li>
+<li>Homogeneous housing types</li>
+<li>No explicit modeling of transport links</li>
+<li>Static environmental designations</li>
+</ol>
+<p>These could be relaxed in more sophisticated versions of the
+model.</p>
+<h1 id="applications">Applications</h1>
+<p>This algorithm can help:</p>
+<ol type="1">
+<li>Identify areas with highest development potential</li>
+<li>Estimate maximum housing capacity under current constraints</li>
+<li>Model price impacts of different development patterns</li>
+<li>Evaluate trade-offs between environmental protection and housing
+supply</li>
+</ol>
+<p>The results suggest where planning policy might be unnecessarily
+restrictive and where development might most effectively improve housing
+affordability while respecting environmental constraints.</p>
+<h1 id="convex-cost-building-rate">Convex cost building rate</h1>
+<p>The algorithm in the previous section is a simple linear model, which
+might not adequately capture the cost implications of increased building
+across different areas. In effect, by not having costs increase with the
+rate of development, the model may introduce a bias towards building in
+areas with low prices that would be outbid by areas with higher price
+differentials.</p>
+<p>We address this problem by introducing a convex cost building rate,
+where the unit cost of building increases with the number of units
+built. We also introduce a density scaling factor, to account for the
+fact that the cost of building in denser areas is higher.</p>
+<h2 id="developer-profit-function">Developer Profit Function</h2>
+<p>In each iteration, developers choose how many homes to build by
+maximizing profit:</p>
+<p><span class="math display">\[
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
+\]</span></p>
+<p>Where:</p>
+<ul>
+<li><span class="math inline">\(P_{i,t}\)</span> is the local price per
+square meter</li>
+<li><span class="math inline">\(c_0\)</span> is the base construction
+cost (£3,000)</li>
+<li><span class="math inline">\(d\)</span> is current density (homes per
+hectare)</li>
+<li><span class="math inline">\(\gamma\)</span> controls how quickly
+costs rise with density</li>
+<li><span class="math inline">\(I_{i,t}\)</span> is the number of new
+homes</li>
+</ul>
+<p>This captures how construction becomes more expensive in denser
+areas, while maintaining convexity in the choice variable I.</p>
+<h2 id="profit-maximization-process">Profit Maximization Process</h2>
+<p>The profit function expands to:</p>
+<p><span class="math display">\[
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
+\]</span></p>
+<p>To find the profit-maximizing development size, we take the first
+derivative with respect to I:</p>
+<p><span class="math display">\[
+\frac{d\Pi_{i,t}}{dI_{i,t}} = P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t}
+\]</span></p>
+<p>Setting this equal to zero:</p>
+<p><span class="math display">\[
+P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t} = 0
+\]</span></p>
+<p>And solving for I gives the optimal development size:</p>
+<p><span class="math display">\[
+I_{i,t}^* = \frac{P_{i,t} - c_0}{2c_0\gamma d_{i,t}}
+\]</span></p>
+<p>This formula tells us that:</p>
+<ol type="1">
+<li>Development is larger where prices exceed costs by more</li>
+<li>Development is smaller in areas with higher existing density</li>
+<li>The <span class="math inline">\(\gamma\)</span> parameter determines
+how strongly density constrains development</li>
+<li>No development occurs when prices are below base construction
+costs</li>
+</ol>
+<p>The formula provides an optimal development size for each MSOA,
+subject to the additional density constraints in the model.</p>
+<p>By adjusting the cost function to reflect local conditions, we relax
+the following assumptions:</p>
+<ol type="1">
+<li><strong>Uniform construction costs across locations</strong>: The
+model now allows for construction costs to vary based on the number of
+units built.</li>
+<li><strong>No local infrastructure constraints</strong>: The model can
+now account for the impact of local infrastructure on construction
+costs.</li>
+</ol>
+</body>
+</html>
