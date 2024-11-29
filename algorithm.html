@@ -174,6 +174,54 @@
 <header id="title-block-header">
 <h1 class="title">Algorithm for housing development</h1>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#core-economic-logic" id="toc-core-economic-logic">Core
+Economic Logic</a></li>
+<li><a href="#protected-land-calculation"
+id="toc-protected-land-calculation">Protected Land Calculation</a></li>
+<li><a href="#development-process"
+id="toc-development-process">Development Process</a>
+<ul>
+<li><a href="#price-signals" id="toc-price-signals">Price
+Signals</a></li>
+<li><a href="#rate-of-development" id="toc-rate-of-development">Rate of
+Development</a></li>
+<li><a href="#price-response" id="toc-price-response">Price
+Response</a></li>
+</ul></li>
+<li><a href="#key-features-and-economic-implications"
+id="toc-key-features-and-economic-implications">Key Features and
+Economic Implications</a>
+<ul>
+<li><a href="#market-led-development"
+id="toc-market-led-development">Market-Led Development</a></li>
+<li><a href="#progressive-price-moderation"
+id="toc-progressive-price-moderation">Progressive Price
+Moderation</a></li>
+<li><a href="#environmental-protection"
+id="toc-environmental-protection">Environmental Protection</a></li>
+<li><a href="#density-aware-growth"
+id="toc-density-aware-growth">Density-Aware Growth</a></li>
+<li><a href="#self-limiting-mechanism"
+id="toc-self-limiting-mechanism">Self-Limiting Mechanism</a></li>
+</ul></li>
+<li><a href="#limitations-and-assumptions"
+id="toc-limitations-and-assumptions">Limitations and
+Assumptions</a></li>
+<li><a href="#applications" id="toc-applications">Applications</a></li>
+<li><a href="#convex-investment-adjustment-costs"
+id="toc-convex-investment-adjustment-costs">Convex investment adjustment
+costs</a>
+<ul>
+<li><a href="#developer-profit-function"
+id="toc-developer-profit-function">Developer Profit Function</a></li>
+<li><a href="#profit-maximization-process"
+id="toc-profit-maximization-process">Profit Maximization
+Process</a></li>
+</ul></li>
+</ul>
+</nav>
 <h1 id="core-economic-logic">Core Economic Logic</h1>
 <p>The algorithm models how housing development might respond to price
 signals while respecting environmental and planning constraints. It
@@ -287,7 +335,8 @@ supply</li>
 <p>The results suggest where planning policy might be unnecessarily
 restrictive and where development might most effectively improve housing
 affordability while respecting environmental constraints.</p>
-<h1 id="convex-cost-building-rate">Convex cost building rate</h1>
+<h1 id="convex-investment-adjustment-costs">Convex investment adjustment
+costs</h1>
 <p>The algorithm in the previous section is a simple linear model, which
 might not adequately capture the cost implications of increased building
 across different areas. In effect, by not having costs increase with the
@@ -302,7 +351,8 @@ fact that the cost of building in denser areas is higher.</p>
 <p>In each iteration, developers choose how many homes to build by
 maximizing profit:</p>
 <p><span class="math display">\[
-\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0 \left(1 + \Phi ( I_{i,t}, I_{i,t-1})
+\right) I_{i,t}
 \]</span></p>
 <p>Where:</p>
 <ul>
@@ -310,53 +360,60 @@ maximizing profit:</p>
 square meter</li>
 <li><span class="math inline">\(c_0\)</span> is the base construction
 cost (£3,000)</li>
-<li><span class="math inline">\(d\)</span> is current density (homes per
-hectare)</li>
-<li><span class="math inline">\(\gamma\)</span> controls how quickly
-costs rise with density</li>
+<li><span class="math inline">\(\Phi\)</span> is a function that
+controls how quickly costs rise with changing investment in new
+homes</li>
+<li><span
+class="math inline">\(\Phi=\frac{\kappa}{2}(\frac{I_{i,t}}{I_{i,t-1}}-1)^2\)</span></li>
+<li><span class="math inline">\(\kappa\)</span> is a parameter that
+controls the degree to which adjustment costs increase with changing
+investment in new homes</li>
 <li><span class="math inline">\(I_{i,t}\)</span> is the number of new
 homes</li>
 </ul>
-<p>This captures how construction becomes more expensive in denser
-areas, while maintaining convexity in the choice variable I.</p>
+<p>This captures how construction becomes more expensive the more
+investment deviates from the previous period, while maintaining
+convexity in the choice variable I.</p>
 <h2 id="profit-maximization-process">Profit Maximization Process</h2>
 <p>The profit function expands to:</p>
 <p><span class="math display">\[
-\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0\left(1 +
+\frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right)
+I_{i,t}
 \]</span></p>
 <p>To find the profit-maximizing development size, we take the first
 derivative with respect to I:</p>
 <p><span class="math display">\[
-\frac{d\Pi_{i,t}}{dI_{i,t}} = P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t}
+\frac{d\Pi_{i,t}}{dI_{i,t}} = P_{i,t} - c_0 - c_0\left(1 +
+\frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right)- c_0
+\kappa \left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)
+\frac{I_{i,t}}{I_{i,t-1}}
 \]</span></p>
 <p>Setting this equal to zero:</p>
 <p><span class="math display">\[
-P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t} = 0
+P_{i,t} - c_0 - c_0\left(1 +
+\frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right)- c_0
+\kappa \left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)
+\frac{I_{i,t}}{I_{i,t-1}} = 0
 \]</span></p>
 <p>And solving for I gives the optimal development size:</p>
 <p><span class="math display">\[
-I_{i,t}^* = \frac{P_{i,t} - c_0}{2c_0\gamma d_{i,t}}
+I_{i,t}^{*} = I_{i,t-1} \left[\frac{2}{3}+ \sqrt{6 \frac{P_{i,t} -
+c_0}{c_0 \kappa}} \right]
 \]</span></p>
+<p>There are two solutions to the optimal level of investment <span
+class="math inline">\(I_{i,t}^*\)</span>. The first of these solutions
+(+) satisfies the second order condition for a maximum, while the second
+(-) does not. There is therefore only one economically meaningful
+solution.</p>
 <p>This formula tells us that:</p>
 <ol type="1">
 <li>Development is larger where prices exceed costs by more</li>
-<li>Development is smaller in areas with higher existing density</li>
-<li>The <span class="math inline">\(\gamma\)</span> parameter determines
-how strongly density constrains development</li>
-<li>No development occurs when prices are below base construction
-costs</li>
+<li>It is costly to very rapidly change investment in new homes,
+resulting in rapidly increasing costs</li>
 </ol>
-<p>The formula provides an optimal development size for each MSOA,
-subject to the additional density constraints in the model.</p>
-<p>By adjusting the cost function to reflect local conditions, we relax
-the following assumptions:</p>
-<ol type="1">
-<li><strong>Uniform construction costs across locations</strong>: The
-model now allows for construction costs to vary based on the number of
-units built.</li>
-<li><strong>No local infrastructure constraints</strong>: The model can
-now account for the impact of local infrastructure on construction
-costs.</li>
-</ol>
+<p>By adjusting the cost functions, we relax the assumption that
+construction costs are uniform across locations and that there are no
+costs to rapidly changing investment in new homes.</p>
 </body>
 </html>

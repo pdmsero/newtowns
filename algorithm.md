@@ -116,7 +116,7 @@ This algorithm can help:
 
 The results suggest where planning policy might be unnecessarily restrictive and where development might most effectively improve housing affordability while respecting environmental constraints.
 
-# Convex cost building rate
+# Convex investment adjustment costs
 
 The algorithm in the previous section is a simple linear model, which might not adequately capture the cost implications of increased building across different areas. In effect, by not having costs increase with the rate of development, the model may introduce a bias towards building in areas with low prices that would be outbid by areas with higher price differentials.
 
@@ -127,55 +127,51 @@ We address this problem by introducing a convex cost building rate, where the un
 In each iteration, developers choose how many homes to build by maximizing profit:
 
 $$
-\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
-$$
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0 \left(1 + \Phi ( I_{i,t}, I_{i,t-1}) \right) I_{i,t}
+$$ 
 
 Where:
 
 - $P_{i,t}$ is the local price per square meter
 - $c_0$ is the base construction cost (£3,000)
-- $d$ is current density (homes per hectare)
-- $\gamma$ controls how quickly costs rise with density
+- $\Phi$ is a function that controls how quickly costs rise with changing investment in new homes
+- $\Phi=\frac{\kappa}{2}(\frac{I_{i,t}}{I_{i,t-1}}-1)^2$
+- $\kappa$ is a parameter that controls the degree to which adjustment costs increase with changing investment in new homes
 - $I_{i,t}$ is the number of new homes
 
-This captures how construction becomes more expensive in denser areas, while maintaining convexity in the choice variable I.
+This captures how construction becomes more expensive the more investment deviates from the previous period, while maintaining convexity in the choice variable I.
 
 ## Profit Maximization Process
 
 The profit function expands to:
 
 $$
-\Pi_{i,t} = P_{i,t} I_{i,t} - c_0(1 + \gamma d_{i,t} I_{i,t}) I_{i,t}
+\Pi_{i,t} = P_{i,t} I_{i,t} - c_0\left(1 + \frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right) I_{i,t}
 $$
 
 To find the profit-maximizing development size, we take the first derivative with respect to I:
 
 $$
-\frac{d\Pi_{i,t}}{dI_{i,t}} = P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t}
+\frac{d\Pi_{i,t}}{dI_{i,t}} = P_{i,t} - c_0 - c_0\left(1 + \frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right)- c_0 \kappa \left(\frac{I_{i,t}}{I_{i,t-1}}-1\right) \frac{I_{i,t}}{I_{i,t-1}}
 $$
 
 Setting this equal to zero:
 
 $$
-P_{i,t} - c_0 - 2c_0\gamma d_{i,t} I_{i,t} = 0
+P_{i,t} - c_0 - c_0\left(1 + \frac{\kappa}{2}\left(\frac{I_{i,t}}{I_{i,t-1}}-1\right)^2\right)- c_0 \kappa \left(\frac{I_{i,t}}{I_{i,t-1}}-1\right) \frac{I_{i,t}}{I_{i,t-1}} = 0
 $$
 
 And solving for I gives the optimal development size:
 
 $$
-I_{i,t}^* = \frac{P_{i,t} - c_0}{2c_0\gamma d_{i,t}}
+I_{i,t}^{*} = I_{i,t-1} \left[\frac{2}{3}+ \sqrt{6 \frac{P_{i,t} - c_0}{c_0 \kappa}} \right]
 $$
+
+There are two solutions to the optimal level of investment $I_{i,t}^*$. The first of these solutions (+) satisfies the second order condition for a maximum, while the second (-) does not. There is therefore only one economically meaningful solution.
 
 This formula tells us that:
 
 1. Development is larger where prices exceed costs by more
-2. Development is smaller in areas with higher existing density
-3. The $\gamma$ parameter determines how strongly density constrains development
-4. No development occurs when prices are below base construction costs
+2. It is costly to very rapidly change investment in new homes, resulting in rapidly increasing costs
 
-The formula provides an optimal development size for each MSOA, subject to the additional density constraints in the model.
-
-By adjusting the cost function to reflect local conditions, we relax the following assumptions:
-
-1. **Uniform construction costs across locations**: The model now allows for construction costs to vary based on the number of units built.
-2. **No local infrastructure constraints**: The model can now account for the impact of local infrastructure on construction costs.
+By adjusting the cost functions, we relax the assumption that construction costs are uniform across locations and that there are no costs to rapidly changing investment in new homes.
